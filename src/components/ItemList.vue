@@ -1,0 +1,22 @@
+<template>
+  <div>
+    <div>
+      <h1>Down below there is a list of Item</h1>
+      <Item v-for="item in displayItems" :key="item.id" :item="item" />
+    </div>
+  </div>
+</template>
+
+<script>
+import Item from '@/components/Item.vue'
+export default {
+  components: {
+    Item
+  },
+  data() {
+    return {
+      displayItems: window.items
+    }
+  }
+}
+</script>
