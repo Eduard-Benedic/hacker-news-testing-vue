@@ -46,13 +46,36 @@ describe('ProgressBar.vue', () => {
 
   test('increases width by 1% every 100 ms after start call', async () => {
     const wrapper = shallowMount(ProgressBar)
-    await wrapper.vm.start()
-    jest.runTimersToTime(100)
-    expect(wrapper.element.style.width).toBe('1%')
-    jest.runTimersToTime(900)
-    expect(wrapper.element.style.width).toBe('10%')
-    jest.runTimersToTime(4000)
-    expect(wrapper.element.style.width).toBe('50%')
+
+    wrapper.vm.start()
+
+    jest.advanceTimersByTime(100)
+    await wrapper.vm.$nextTick(() => {
+      expect(wrapper.element.style.width).toBe('1%')
+    })
+   
+    jest.advanceTimersByTime(900)
+    await wrapper.vm.$nextTick(() => {
+      expect(wrapper.element.style.width).toBe('10%')
+    })
+
+    jest.advanceTimersByTime(8000)
+    await wrapper.vm.$nextTick(() => {
+      expect(wrapper.element.style.width).toBe('90%')
+    })
   })
+
+  test('clears timer when finish is caleld', () => {
+    jest.spyOn(window, 'clearInterval')
+    setInterval.mockReturnValue('id')
+  
+    const wrapper = shallowMount(ProgressBar)
+    wrapper.vm.start()
+    wrapper.vm.finish()
+
+    expect(window.clearInterval).toHaveBeenCalledWith('id')
+
+  })
+
 
 })

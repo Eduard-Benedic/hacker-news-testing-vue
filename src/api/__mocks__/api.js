@@ -1,0 +1,1 @@
+export const fetchListData = jest.fn().mockImplementation(() => Promise.resolve([]))
