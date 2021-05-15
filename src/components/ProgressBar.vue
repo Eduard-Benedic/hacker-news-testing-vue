@@ -1,6 +1,6 @@
 <template>
   <div @click="logClicked" 
-  :class='{hidden: hidden}'
+  :class='{hidden: hidden, error: error}'
   :style="{width: `${percent}%`}">
    
   </div>
@@ -11,6 +11,7 @@ export default {
   data() {
     return {
       hidden: true,
+      error: false,
       percent: 0
     }
   },
@@ -23,13 +24,33 @@ export default {
       this.percent = 0
       this.timer = setInterval(() => {
         this.percent++
-      }, 100)
+      }, 10)
     },
     finish() {
-      this.hidden = true
       this.percent = 100
+      this.hidden = true
       clearInterval(this.timer)
+    },
+    fail() {
+      this.error = true
     }
   }
 }
 </script>
+<style scoped>
+div {
+  height: 10px;
+  width: 100vw;
+  position: fixed;
+  display: block;
+  background: purple;
+  z-index: 200;
+  top: 0;
+}
+.error {
+  background-color: red;
+}
+.hidden {
+  display: none;
+}
+</style>

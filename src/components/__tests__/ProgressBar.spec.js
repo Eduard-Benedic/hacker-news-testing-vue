@@ -51,17 +51,17 @@ describe('ProgressBar.vue', () => {
 
     jest.advanceTimersByTime(100)
     await wrapper.vm.$nextTick(() => {
-      expect(wrapper.element.style.width).toBe('1%')
+      expect(wrapper.element.style.width).toBe('10%')
     })
    
     jest.advanceTimersByTime(900)
     await wrapper.vm.$nextTick(() => {
-      expect(wrapper.element.style.width).toBe('10%')
+      expect(wrapper.element.style.width).toBe('100%')
     })
 
-    jest.advanceTimersByTime(8000)
+    jest.advanceTimersByTime(1000)
     await wrapper.vm.$nextTick(() => {
-      expect(wrapper.element.style.width).toBe('90%')
+      expect(wrapper.element.style.width).toBe('200%')
     })
   })
 

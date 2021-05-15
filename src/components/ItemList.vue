@@ -1,9 +1,6 @@
 <template>
   <div>
-    <div>
-      <h1>Down below there is a list of Item</h1>
-      <Item v-for="item in displayItems" :key="item.id" :item="item" />
-    </div>
+    <Item v-for="item in displayItems" :key="item.id" :item="item" />
   </div>
 </template>
 

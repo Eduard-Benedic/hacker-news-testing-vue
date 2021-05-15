@@ -1,8 +1,12 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
+
+  <div class="container">
+    
+    <h1 class="title">Hacker news</h1>
     <ProgressBar />
     <ItemList />
+  </div>
 
   </div>
 </template>
@@ -22,3 +26,14 @@ export default {
   }
 }
 </script>
+<style scoped>
+.title {
+  font-size: 4rem;
+}
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  box-shadow: 2px 1px 12px rgba(0, 0, 0, 0.2);
+  padding: 25px 25px;
+}
+</style>
