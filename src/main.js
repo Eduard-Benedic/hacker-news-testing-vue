@@ -3,20 +3,8 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-import { fetchListData } from './api/api'
-
 import ProgressBar from './components/ProgressBar.vue'
 
-function getTopItems () {
-  return fetchListData('top')
-    .then(items => items)
-}
-
-
-getTopItems().then((items) => {
-  window.items = items
-
-})
 
 const bar = new Vue(ProgressBar).$mount()
 Vue.prototype.$bar = bar
