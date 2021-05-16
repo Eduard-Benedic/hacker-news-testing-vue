@@ -1,10 +1,13 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to='/top'>Top</router-link> 1
+      <router-link to='/new'>New</router-link>
+      <router-link to='/show'>Show</router-link>
+      <router-link to='/ask'>Ask</router-link>
+      <router-link to='/job'>Jobs</router-link>
     </div>
-    <router-view/>
+    <router-view :key="$route.params.type"/>
   </div>
 </template>
 
@@ -24,6 +27,8 @@
 #nav a {
   font-weight: bold;
   color: #2c3e50;
+  margin-right: 20px;
+  font-size: 1.2rem;
 }
 
 #nav a.router-link-exact-active {

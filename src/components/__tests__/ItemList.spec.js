@@ -1,10 +1,10 @@
-import { shallowMount, createLocalVue } from "@vue/test-utils"
+import { shallowMount, createLocalVue, RouterLinkStub } from "@vue/test-utils"
 import Vuex from 'vuex'
 import flushPromises from "flush-promises"
 import ItemList from '../ItemList.vue'
 import Item from '../Item.vue'
 
-import { merge, mergeWith } from "lodash"
+import { mergeWith } from "lodash"
 
 function customizer(objValue, srcValue) {
   if (Array.isArray(srcValue)) {
@@ -38,7 +38,15 @@ describe('ItemList.vue', () => {
 
   function createWrapper(overrides) {
     const defaultMountingOptions = {
+      stubs: {
+        RouterLink: RouterLinkStub
+      },
       mocks: {
+        $route: {
+          params: {
+            type: 'top'
+          }
+        },
         $bar: {
           start: jest.fn(),
           finish: jest.fn(),
@@ -87,94 +95,140 @@ describe('ItemList.vue', () => {
     expect(mocks.$bar.finish).toHaveBeenCalled( )
   })
 
-  test('dispatches fetchListData with top', async () => {
+  test('dispatches fetchListData with $route.params.type', async () => {
+    
     const store = createStore()
     store.dispatch = jest.fn(() => Promise.resolve())
-    createWrapper({ store })
+
+    const type = 'a type'
+    const mocks = {
+      $route: {
+        params: {
+          type
+        }
+      }
+    }
+    createWrapper({ store, mocks })
     await flushPromises()
-    expect(store.dispatch).toHaveBeenCalledWith('fetchListData', {
-      type: 'top'
+
+    expect(store.dispatch).toHaveBeenCalledWith('fetchListData',
+      { type })
+  
+  })
+
+  test('renders 1/5 when on page 1 of 5', () => {
+    const store = createStore({
+      getters: {
+        maxPage: () => 5
+      }
     })
+    const wrapper = createWrapper({ store })
+    expect(wrapper.text()).toContain('1/5')
+  })
+
+  test('renders 2/5 when on page 2 of 5', () => {
+    const store = createStore({
+      getters: {
+        maxPage: () => 5
+      }
+    })
+    const mocks = {
+      $route: {
+        params: {
+          page: '2'
+        }
+      }
+    }
+    const wrapper = createWrapper({ mocks, store })
+    expect(wrapper.text()).toContain('2/5')
+  })
+
+  test('calls $router.replace when the page parameter is greater than the max page count', async () => {
+
+    expect.assertions(1)
+    const store = createStore({
+      getters: {
+        maxPage: () => 5
+      }
+    })
+
+    const mocks = {
+      $route: {
+        params: {
+          page: '1000'
+        }
+      },
+      $router: {
+        replace: jest.fn()
+      }
+    }
+    createWrapper({ mocks, store })
+    await flushPromises()
+    expect(mocks.$router.replace).toHaveBeenCalledWith('/top/1')
+  })
+
+  test('renders a RouterLink with the previous page if one exists', () => {
+    const mocks = {
+      $route: {
+        params: {
+          page: '2'
+        }
+      }
+    }
+    const wrapper = createWrapper({ mocks })
+
+    expect(wrapper.findComponent(RouterLinkStub).props().to).toBe('/top/1')
+    expect(wrapper.findComponent(RouterLinkStub).text()).toBe('<prev')
+  })
+
+  test('renders a RouterLink with the next page if one exists', () => {
+    const store = createStore({
+      getters: {
+        maxPage: () => 3
+      }
+    })
+
+    const mocks = {
+      $route: {
+        params: {
+          page: '1'
+        }
+      }
+    }
+    const wrapper = createWrapper({ store, mocks })
+    expect(wrapper.findComponent(RouterLinkStub).props().to).toBe('/top/2')
+    expect(wrapper.find(RouterLinkStub).text()).toBe('more>')
+  })
+
+  test('renders a RouterLink with the next page when no page param exists', () => {
+    const store = createStore({
+      getters: {
+        maxPage: () => 3
+      }
+    })
+
+    const wrapper = createWrapper({ store })
+    expect(wrapper.find(RouterLinkStub).props().to).toBe('/top/2')
+    expect(wrapper.find(RouterLinkStub).text()).toBe('more>')
+  })
+
+  test('renders an <a> element without an href it no prev page', () => {
+    const wrapper = createWrapper()
+    expect(wrapper.find('a').attributes().href).toBe(undefined)
+    expect(wrapper.find('a').text()).toBe('<prev')
+  })
+
+  test('renders an <a> element without an href if there are no next pages', () => {
+    const store = createStore({
+      getters: {
+        maxPage: () => 1
+      }
+    })
+
+    const wrapper = createWrapper({ store })
+    expect(wrapper.findAll('a').at(1).attributes().href).toBe(undefined)
+    expect(wrapper.findAll('a').at(1).text()).toBe('more>')
   })
 
 })
-
-// import Item from '@/components/Item.vue'
-// import ItemList from '@/components/ItemList.vue'
-// import { shallowMount } from '@vue/test-utils'
-// import { fetchListData } from '../../api/api'
-// import flushPromises from 'flush-promises'
-
-// jest.mock('../../api/api.js')
-
-// beforeEach(() => {
-//   fetchListData.mockReset()
-// })
-
-// describe('ItemList.vue', () => {
-//   test('renders an Item with data for each item', async () => {
-//     const $bar = {
-//       start: () => { },
-//       finish: () => {}
-//     }
-//     const items = [{ id: 1 }, { id: 2 }, { id: 3 }]
-//     fetchListData.mockResolvedValueOnce(items)
-//     const wrapper = shallowMount(ItemList, {
-//       mocks: { $bar }
-//     })
-//     await flushPromises()
-//     const Items = wrapper.findAllComponents(Item)
-
-//     expect(Items).toHaveLength(items.length)
-
-//     Items.wrappers.forEach((wrapper, i) => {
-//       expect(wrapper.vm.item).toBe(items[i])
-//     })
-//     expect.assertions(4)
-//   })
-
-//   test('calls $bar start on load', async () => {
-//     const $bar = {
-//       start: jest.fn(),
-//       finish: () => {}
-//     }
-//     await flushPromises()
-//     fetchListData.mockResolvedValueOnce([])
-//     shallowMount(ItemList, {
-//       mocks: { $bar }
-//     })
-//     expect($bar.start).toHaveBeenCalledTimes(1)
-//   })
-
-//   test('calls $bar.finish when load is successful', async () => {
-//     const $bar = {
-//       start: () => { },
-//       finish: jest.fn()
-//     }
-//     fetchListData.mockResolvedValueOnce([])
-//     shallowMount(ItemList, {
-//       mocks: {
-//         $bar
-//       }
-//     })
-//     await flushPromises()
-//     expect($bar.finish).toHaveBeenCalled()
-//   })
-
-//   test('calls $bar.fail when load unsuccessful', async () => {
-//     expect.assertions(1)
-//     const $bar = {
-//       start: () => { },
-//       fail: jest.fn()
-//     }
-//     fetchListData.mockRejectedValueOnce()
-//     shallowMount(ItemList, {
-//       mocks: {
-//         $bar
-//       }
-//     })
-//     await flushPromises()
-//     expect($bar.fail).toHaveBeenCalled()
-//   })
-// })
 

@@ -3,7 +3,7 @@
     <a :href="item.url"> {{ item.title }} </a>
     <h4 v-if="item.author"> {{item.author}} </h4>
     <span> {{ item.score }} </span>
-
+    <span>{{item.url}}</span>
   </div>
 </template>
 
